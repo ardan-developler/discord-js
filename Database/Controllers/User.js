@@ -4,7 +4,7 @@ module.exports = {
     async setUser(user) {
         await User.create({
             _id: user.user.id,
-            username: user.nickname ? user.nickname : '닉네임이 없습니다.'
+            username: user.nickname ? user.nickname : user.user.username
         })
         return console.log(`[ MongoDB ] Successfully saved the user: ${user.user.username}(${user.id})`)
     },
