@@ -1,6 +1,6 @@
 const Discord = require("discord.js");
 
-module.exports.run = async (bot, message, args) => {
+exports.run = async (bot, message, args) => {
 
   //!addrole @andrew Dog Person
   if(!message.member.hasPermission("MANAGE_MEMBERS")) return message.reply("Sorry pal, you can't do that.");
@@ -21,6 +21,7 @@ module.exports.run = async (bot, message, args) => {
   }
 }
 
-module.exports.help = {
-  name: "addrole"
+exports.config = {
+  name: "addrole",
+  aliases: []
 }
