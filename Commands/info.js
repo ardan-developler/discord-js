@@ -5,6 +5,7 @@ exports.run = (client, message, args) => {
 
 }
 
-exports.help = {
-    name: '정보'
+exports.config = {
+    name: '정보',
+    aliases: []
 }
