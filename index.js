@@ -1,18 +1,23 @@
 require('dotenv').config()
 
 const Discord = require('discord.js');
-const fs = require('fs');
-const moment = require('moment');
-require('moment').locale('ko-KR');
+const moment = require('moment')
 moment.locale('ko-KR');
 const client = new Discord.Client({disableEveryone: true, autoReconnect: true});
 const Config = require('./Config/Config.json')
-client.commands = new Discord.Collection();
-const dbConnect = require('mongoose').connect
+const mongoose = require('mongoose')
 const db = require('mongoose').connection
+const dbcm = require("dbcm")
+const cmdManager = new dbcm.bot(client, {
+    lang: "ko-KR",
+    cooldown: {},
+    blacklist: {}
+})
+
+cmdManager.registerCommands(__dirname+"/Commands/")
 
 client.on('ready', async () => {
-    dbConnect(process.env.MongoDB_Access, { useFindAndModify: false, useNewUrlParser: true, useUnifiedTopology: true }).then(() => {
+    mongoose.connect(process.env.MongoDB_Access, { useFindAndModify: false, useNewUrlParser: true, useUnifiedTopology: true }).then(() => {
       console.warn(`[ MongoDB ] Connection with database stabilized successfully.\n`)
   }).catch(err => {
       console.error(`\n[ MongoDB ] Access to MongoDB failed to:\n${err}\n`)
@@ -32,21 +37,6 @@ client.on('ready', async () => {
   setInterval(() => st(), 7500);
 });
 
-fs.readdir('./Commands/', (err, files) => {
-    if(err) console.error(err);
-
-    let jsfile = files.filter(f => f.split('.').pop() == 'js')
-    if(jsfile.length <= 0){
-        console.log("[ Commands ] Could't find commands.");
-        process.exit();
-    }
-
-    jsfile.forEach((f, i) => {
-        let props = require(`./Commands/${f}`);
-        console.log(`[ Commands ] Successfully loaded ${f} file.`);
-        client.commands.set(props.help, props);
-    });
-});
 
 client.on('message', async message => {
   if (message.author.bot || message.channel.type === 'dm' || message.system) return
@@ -55,6 +45,9 @@ client.on('message', async message => {
   let args = message.content.slice(Config.PREFIX.length).trim().split(/ +/g)
   let cmd = args.shift().toLowerCase()
 
+  cmdManager.runCommand(cmd, message, args).catch(err => {
+      throw new Error(err)
+  })
   if(message.content.startsWith(Config.PREFIX)) {
 
     let command = message.content.split(Config.PREFIX).pop()
@@ -147,9 +140,6 @@ client.on('message', async message => {
           
     }
 }
-
-  let commandFile = client.commands.get(cmd);
-  if (commandFile) commandFile.run(client, message, args);
 });
 
 client.login(process.env.TOKEN)
