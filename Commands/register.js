@@ -13,54 +13,51 @@ exports.run = (client, message, args) => {
             `)
             message.channel.send(embed)
         } else {
-            if(!res) {
-                let embed = new Discord.RichEmbed()
+            let embed = new Discord.RichEmbed()
                 .setColor('RED')
                 .setDescription(`
                 ${message.author} 님을 ${client.user.username} 데이터베이스에 등록합니다.
                 `)
-                message.channel.send(embed).then(msg => {
-                    msg.react('✅').then(() => msg.react('❎'))
+            message.channel.send(embed).then(msg => {
+                msg.react('✅').then(() => msg.react('❎'))
 
-                    let filterYes = (reaction, user) => reaction.emoji.name === '✅' && user.id === message.author.id
-                    let collectorYes = msg.createReactionCollector(filterYes, { max: 1, time: 60000 })
+                let filterYes = (reaction, user) => reaction.emoji.name === '✅' && user.id === message.author.id
+                let collectorYes = msg.createReactionCollector(filterYes, { max: 1, time: 60000 })
     
-                    let filterNo = (reaction, user) => reaction.emoji.name === '❎' && user.id === message.author.id
-                    let collectorNo = msg.createReactionCollector(filterNo, { max: 1, time: 60000 })
+                let filterNo = (reaction, user) => reaction.emoji.name === '❎' && user.id === message.author.id
+                let collectorNo = msg.createReactionCollector(filterNo, { max: 1, time: 60000 })
 
-                    collectorYes.on('collect', () => {
-                        msg.delete().then(() => {
-                            let embed = new Discord.RichEmbed()
+                collectorYes.on('collect', () => {
+                    msg.delete().then(() => {
+                        let embed = new Discord.RichEmbed()
                             .setColor('GREEN')
                             .setDescription(`
                             ${message.author} 님을 성공적으로 등록하였습니다.
                             `)
-                            message.channel.send(embed)
+                        message.channel.send(embed)
 
-                            Users.setUser(message.member).then(() => {
-                                return;
-                            }).catch(err => {
-                                console.error(`\n[ MongoDB ] Register user date upload error : \n${err}\n`)
-                            })
+                        Users.setUser(message.member).catch(err => {
+                            console.error(`\n[ MongoDB ] Register user date upload error : \n${err}\n`)
                         })
-                    });
+                    })
+                });
 
-                    collectorNo.on('collect', () => {
-                        msg.delete().then(() => {
-                            let embed = new Discord.RichEmbed()
+                collectorNo.on('collect', () => {
+                    msg.delete().then(() => {
+                        let embed = new Discord.RichEmbed()
                             .setColor('RED')
                             .setDescription(`
                             ${message.author} 등록 거부!
                             `)
-                            message.channel.send(embed)
-                        })
-                    });
-                })
-            }
+                        message.channel.send(embed)
+                    })
+                });
+            })
         }
     })
 }
 
-exports.help = {
-    name: '등록'
+exports.config = {
+    name: '등록',
+    aliases: []
 }
